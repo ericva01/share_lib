@@ -5,16 +5,17 @@ def call(Map config = [:]) {
 
     def dockerfileResource = ""
 
+    // Auto-detect project type
     if (fileExists('package.json')) {
-        echo "Detected ReactJS project"
+        echo "✅ ReactJS project detected"
         dockerfileResource = "reactjs/dev.Dockerfile"
 
-    } else if (fileExists('pom.xml')) {
-        echo "Detected Spring Boot project"
+    } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+        echo "✅ Spring Boot (Gradle) project detected"
         dockerfileResource = "spring/dev.Dockerfile"
 
     } else {
-        error "Cannot detect project type (no package.json or pom.xml found)"
+        error "❌ Cannot detect project type (no package.json or build.gradle found)"
     }
 
     // Load Dockerfile from shared library resources
@@ -23,6 +24,7 @@ def call(Map config = [:]) {
         text: libraryResource(dockerfileResource)
     )
 
+    // Build Docker image
     sh """
         docker build -t ${imageName}:${tag} .
     """

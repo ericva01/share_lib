@@ -1,11 +1,11 @@
-@Library('my-shared-lib') _
+@Library('share_library@master') _
 
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "jenkins-app-devop10"
-        REPO_NAME  = "lyvanna544"
+        REPO_NAME  = "share-library"
         TAG        = "v1.0.${BUILD_NUMBER}"
     }
 
@@ -56,17 +56,18 @@ pipeline {
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'DOCKERHUB-CRED',
-                        usernameVariable: 'USERNAME',
-                        passwordVariable: 'PASSCODE'
+                        usernameVariable: 'DOCKERHUB_USER',
+                        passwordVariable: 'DOCKERHUB_PASS'
                     )
                 ]) {
-                    sh """
-                    echo ${PASSCODE} | docker login -u ${USERNAME} --password-stdin
-                    docker push ${REPO_NAME}/${IMAGE_NAME}:${TAG}
-                    """
+                    sh '''
+                        echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
+                        docker push share-library/jenkins-app-devop10:v1.0.10
+                    '''
                 }
             }
         }
+
 
         stage('Run Service') {
             steps {
