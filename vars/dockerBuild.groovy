@@ -6,16 +6,16 @@ def call(Map config = [:]) {
     def dockerfileResource = ""
 
     // Auto-detect project type
-    if (fileExists('package.json')) {
+    if (fileExists('pom.xml') || fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+        echo "✅ Spring Boot project detected"
+        dockerfileResource = "spring/dev.Dockerfile"
+
+    } else if (fileExists('package.json')) {
         echo "✅ ReactJS project detected"
         dockerfileResource = "reactjs/dev.Dockerfile"
 
-    } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
-        echo "✅ Spring Boot (Gradle) project detected"
-        dockerfileResource = "spring/dev.Dockerfile"
-
     } else {
-        error "❌ Cannot detect project type (no package.json or build.gradle found)"
+        error "❌ Cannot detect project type"
     }
 
     // Load Dockerfile from shared library resources
